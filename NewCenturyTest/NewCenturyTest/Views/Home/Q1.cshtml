@@ -1,0 +1,92 @@
+﻿@model NewCenturyTest.Models.Q1Model
+
+<h4>Q1</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Q1">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Text" class="control-label">Salário Atual: </label>
+                <input id="salario_atual" asp-for="Text" class="form-control" style="margin-top:10px" />
+                <span asp-validation-for="Text" class="text-danger"></span>
+            </div>
+            <div class="form-group" >
+                <input id="calc" type="button" value="Novo Salário" class="btn btn-primary" style="margin-top:10px" />
+            </div>
+            <div name="CamposReajuste" id="r1" style="display: none;">
+                <div class="form-group">
+                    <label for="percentual_aumento">Salário Antigo (R$): </label>
+                    <input type="text" id="salarioAntigoId" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="percentual_aumento">Percentual de Aumento(%):</label>
+                    <input type="text" id="percentual_aumento" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="valor_aumento">Valor do Aumento (R$):</label>
+                    <input type="text" id="valor_aumento" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="novo_salario">Novo Salário (R$): </label>
+                    <input type="text" id="novo_salario" class="form-control" readonly>
+                </div>
+                @* <div class="form-group">
+                    <input id="calc" type="button" value="Novo Salário" class="btn btn-primary" style="margin-top:10px" />
+                </div> *@
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+<script src="~/js/jquery-3.7.1.min.js"></script>
+<script>
+    //var salarioInicial = parseFloat(("#salario_atual").val());
+    
+    $("#calc").click(function () {
+        var iniSalario = $("#salario_atual").val();
+        var salario = parseFloat(iniSalario);
+        var novoSalario = salarioNovo();
+        var aumento = novoSalario - salario;
+
+        $("#salarioAntigoId").val(salario.toFixed(2));
+        $("#percentual_aumento").val(((aumento / salario) * 100).toFixed(2)); 
+        $("#valor_aumento").val(aumento.toFixed(2)); 
+        $("#novo_salario").val(novoSalario.toFixed(2)); 
+        $("#r1").show(); //Mostra a div com os conteudos escondidos
+    });
+
+    function salarioNovo() {
+        salario = $("#salario_atual").val();
+        var salarioReajustado = taxaReajuste(salario);       
+        return parseFloat(salarioReajustado);
+    }
+
+    function taxaReajuste(salario) {
+        salario = parseFloat(salario);
+        switch (true) {
+            case salario <= 280:
+                return salario + salario * (20 / 100);
+                break;
+            case salario > 280 && salario < 700:
+                return salario + salario * (15 / 100);
+                break;
+            case salario >= 700 && salario < 1500:
+                return salario + salario * (10 / 100);
+                break;
+            default:
+                return salario + salario * (5 / 100);
+        }
+    }
+
+
+</script>
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
