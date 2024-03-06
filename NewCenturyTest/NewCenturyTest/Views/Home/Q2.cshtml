@@ -1,0 +1,218 @@
+﻿@model NewCenturyTest.Models.Q2Model
+
+<h4>Q2Model</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form id="idFormVoto" asp-action ="Q2">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="questao" class="control-label">Qual o melhor Sistema Operacional para uso em servidores?</label>
+                <input  id="questao" asp-for="questao" class="form-control" placeholder="Vote dentro das opções: "/>          
+            </div>
+            
+            <div id="botaoVoto"class="form-group">
+                <input id="idVoto" type="button" value="Votar" class="btn btn-primary" style="margin-top:10px; display:hidden;" />
+            </div>
+        </form>
+        <div id="opiVoto">
+            <span class="text-danger">
+                Opções de voto:
+                <br>
+                1- Windows Server<br>
+                2- Unix<br>
+                3- Linux<br>
+                4- Netware<br>
+                5- Mac OS<br>
+                6- Outro<br>
+            </span>
+
+        </div>
+
+        <div id="Resultados"style="margin-top:10px; display:none;" class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Sistema Operacional</th>
+                        <th>Votos</th>
+                        <th>%</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Windows Server</td>
+                        <td id="votosWindows"></td> 
+                        <td id="percentualWindows"></td> 
+                    </tr>
+                    <tr>
+                        <td>Unix</td>
+                        <td id="votosUnix"></td>
+                        <td id="percentualUnix"></td>
+                    </tr>
+                    <tr>
+                        <td>Linux</td>
+                        <td id="votosLinux"></td>
+                        <td id="percentualLinux"></td>
+                    </tr>
+                    <tr>
+                        <td>Netware</td>
+                        <td id="votosNetware"></td>
+                        <td id="percentualNetware"></td>
+                    </tr>
+                    <tr>
+                        <td>Mac OS</td>
+                        <td id="votosMacOs"></td>
+                        <td id="percentualMacOs"></td>
+                    </tr>
+                    <tr>
+                        <td>Outro</td>
+                        <td id="votosOutro"></td>
+                        <td id="percentualOutro"></td>
+                    </tr>                           
+                    <tr>
+                        <td>Total</td>
+                        <td id="totalVotos"></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+            <br /><
+            <div class="text-info">
+                <p id="MensagemDeConclusao"></p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+<script src="~/js/jquery-3.7.1.min.js"></script>
+<script>
+
+    var listaVotos = [];
+    var votosWS = 0;
+    var votosUnix = 0;
+    var votosLinux = 0;
+    var votosNetware = 0;
+    var votosMacOS = 0;
+    var votosOutros = 0;
+    var totalVotos = 0;
+
+    $(document).ready(function () {
+        $("#questao").keyup(function () {
+            console.log("validou");
+            var valor = parseInt($(this).val());
+            var botaoVotar = $("#idVoto");
+
+            var spanErro = $(this).next();
+            if (isNaN(valor) || valor < 0 || valor > 6) {
+                botaoVotar.hide();
+                spanErro.text("Digite um valor entre 0 a 6.").show();
+
+            } else {
+
+                botaoVotar.show();
+                spanErro.hide();
+
+            }
+        });
+
+        $("#idVoto").click(function () {
+            console.log("votou");
+            var valor = parseInt($("#questao").val());
+            var formulario = $("#idFormVoto");
+            if (valor != null && valor != 0) {
+                listaVotos.push(valor);
+            }
+            if (valor == 0) {
+                formulario.hide();
+                var tabela = $("#Resultados");
+                $.each(listaVotos, function (index, item) {
+                    switch (item) {
+                        case 1:
+                            votosWS++;
+                            break;
+                        case 2:
+                            votosUnix++;
+                            break;
+                        case 3:
+                            votosLinux++;
+                            break;
+                        case 4:
+                            votosNetware++;
+                            break;
+                        case 5:
+                            votosMacOS++;
+                            break;
+                        case 6:
+                            votosOutros++;
+                            break;
+                        default:
+                            break;
+                    }
+                });
+
+                totalVotos = votosWS + votosUnix + votosLinux + votosNetware + votosMacOS + votosOutros;
+
+
+                $("#votosWindows").text(votosWS);
+                $("#percentualWindows").text(((votosWS / totalVotos) * 100).toFixed(2) + "%");
+
+                $("#votosUnix").text(votosUnix);
+                $("#percentualUnix").text(((votosUnix / totalVotos) * 100).toFixed(2) + "%");
+
+                $("#votosLinux").text(votosLinux);
+                $("#percentualLinux").text(((votosLinux / totalVotos) * 100).toFixed(2) + "%");
+
+                $("#votosNetware").text(votosNetware);
+                $("#percentualNetware").text(((votosNetware / totalVotos) * 100).toFixed(2) + "%");
+
+                $("#votosMacOs").text(votosMacOS);
+                $("#percentualMacOs").text(((votosMacOS / totalVotos) * 100).toFixed(2) + "%");
+
+                $("#votosOutro").text(votosOutros);
+                $("#percentualOutro").text(((votosOutros / totalVotos) * 100).toFixed(2) + "%");
+
+                $("#totalVotos").text(totalVotos);
+
+                tabela.show();
+
+
+            }
+            $("#questao").val("");
+
+            $("#MensagemDeConclusao").text(returnMaior());
+
+
+
+        });
+
+        function returnMaior() {
+            console.log("Chamou maior");
+            var variavelTabela = ["Windows Server", "Unix", "Linux", "Netware", "Mac OS", "Outro"];
+            var votosCount = [votosWS, votosUnix, votosLinux, votosNetware, votosMacOS, votosOutros];
+            var maior = 0;
+            var indice = 0;
+            var controle = 0;
+
+            votosCount.forEach(element => {
+                if (element > maior) {
+                    maior = element;
+                    indice = controle;
+                }
+                controle++;
+            });
+            return "O Sistema Operacional mais votado foi o " + variavelTabela[indice] + ", com " +
+                maior + " votos, correspondendo a " + ((maior / totalVotos) * 100).toFixed(2) + "% dos votos.";
+        }
+    });
+
+</script>
+
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
