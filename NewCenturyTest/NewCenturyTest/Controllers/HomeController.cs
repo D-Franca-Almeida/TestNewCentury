@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NewCenturyTest.Models;
+using NewCenturyTest.Models.Q5Models;
+using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
 using System.Reflection;
@@ -10,10 +12,12 @@ namespace NewCenturyTest.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly string _dataFilePath;
 
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
+            _dataFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "HistoricoTentativas.json");
         }
 
         public IActionResult Index()
@@ -124,7 +128,79 @@ namespace NewCenturyTest.Controllers
         }
         public IActionResult Q5()
         {
-            return View();
+            List<Jogador> modelo = GerarListaAleatoriaJogadores(10);
+            try
+            {
+                var dados = LerDados();
+                dados.AddRange(modelo);
+
+                SalvarDados(dados);
+
+                //return Ok("Dados adicionados com sucesso");
+                return View();
+            }
+            catch (Exception ex)
+            {
+                //return StatusCode(500, $"Erro ao adicionar dados: {ex.Message}");
+                return View();
+            }
+            //return View();
+        }
+
+        private List<Jogador> LerDados()
+        {
+            try
+            {
+                if (!System.IO.File.Exists(_dataFilePath))
+                {
+                    return new List<Jogador>();
+                }
+
+                var json = System.IO.File.ReadAllText(_dataFilePath);
+                return JsonConvert.DeserializeObject<List<Jogador>>(json);
+            }
+            catch (Exception ex)
+            {
+                // Log do erro para diagnóstico
+                Console.WriteLine($"Erro ao ler dados do arquivo JSON: {ex}");
+                throw; // Re-throw para sinalizar que ocorreu um erro
+            }
+        }
+
+        private void SalvarDados(List<Jogador> dados)
+        {
+            try {
+                var json = JsonConvert.SerializeObject(dados, Formatting.Indented);
+                var linhas = new[] { json }; // Coloca o JSON em um array de uma única linha
+                System.IO.File.WriteAllLines(_dataFilePath, linhas);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Erro ao ler dados do arquivo JSON: {ex}");
+                throw; // Re-throw para sinalizar que ocorreu um erro
+            }
+        }
+
+        static List<Jogador> GerarListaAleatoriaJogadores(int quantidade)
+        {
+            var nomes = new[] { "João", "Maria", "Pedro", "Ana", "José", "Carla", "Lucas", "Fernanda", "Marcos", "Amanda" };
+            var rand = new Random();
+            var listaJogadores = new List<Jogador>();
+
+            for (int i = 1; i <= quantidade; i++)
+            {
+                var nomeAleatorio = nomes[rand.Next(nomes.Length)];
+                var jogador = new Jogador
+                {
+                    Id = i,
+                    Name = nomeAleatorio,
+                    ContadorVitorias = rand.Next(0, 11), // Vitórias aleatórias entre 0 e 10
+                    ContadorDerrotas = rand.Next(0, 11) // Derrotas aleatórias entre 0 e 10
+                };
+                listaJogadores.Add(jogador);
+            }
+
+            return listaJogadores;
         }
 
         public IActionResult Privacy()
