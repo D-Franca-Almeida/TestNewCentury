@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Q3";
+}
+
+<h4>Quantidade de vendedores em cada intervalo de salário:</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Intervalo de Valores</th>
+            <th>Qtd Vendededores</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var intervalo in ViewBag.Intervalos)
+        {
+            <tr>
+                <td>@intervalo.Split(':')[0]</td>
+                <td>@intervalo.Split(':')[1]</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,20 @@
+﻿@model NewCenturyTest.Models.CupomFiscalModel;
+
+@{
+    ViewData["Title"] = "Cupom Fiscal";
+}
+
+<div class="container mt-4">
+    <h2>Cupom Fiscal</h2>
+
+    <div class="row">
+        <div class="col-md-6">
+            <p><strong>Tipo de Carne:</strong> @Model.TipoCarne</p>
+            <p><strong>Quantidade:</strong> @Model.Quantidade Kg</p>
+            <p><strong>Preço Total:</strong> R$ @Model.PrecoTotal</p>
+            <p><strong>Tipo de Pagamento:</strong> @Model.TipoPagamento</p>
+            <p><strong>Desconto:</strong> R$ @Model.ValorDesconto</p>
+            <p><strong>Valor a Pagar:</strong> R$ @Model.ValorPago</p>
+        </div>
+    </div>
+</div>

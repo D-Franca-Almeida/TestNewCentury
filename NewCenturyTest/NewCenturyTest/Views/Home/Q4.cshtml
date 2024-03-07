@@ -1,0 +1,71 @@
+﻿@{
+    ViewData["Title"] = "Q4";
+}
+
+<h4>Promoção de Carnes</h4>
+
+<form method="post" action="CupomFiscal" class="container mt-4">
+    <div class="form-group row" style="margin-top:5px;>
+        <label for="tipo" class="col-sm-2 col-form-label">Tipo de Carne:</label>
+        <div class="col-sm-10">
+            <select name="tipo" id="tipo" class="form-control">
+                <option value="FileDuplo">File Duplo</option>
+                <option value="Alcatra">Alcatra</option>
+                <option value="Picanha">Picanha</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group row" style="margin-top:5px;>
+        <label for="quantidade" class="col-sm-2 col-form-label">Quantidade (em Kg):</label>
+        <div class="col-sm-10">
+            <input type="number" name="quantidade" id="quantidade" step="0.1" min="0.1" class="form-control">
+        </div>
+    </div>
+
+    <div class="form-group row" style="margin-top:5px;">
+        <label for="tipoPagamento" class="col-sm-2 col-form-label">Tipo de Pagamento:</label>
+        <div class="col-sm-10">
+            <select name="tipoPagamento" id="tipoPagamento" class="form-control">
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Cartao">Cartao</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="idCartaoTabajara" class="form-group row" style="display:none; margin-top:5px;">
+        <label for="cartaoTabajara" class="col-sm-2 col-form-label">Compra com Cartão Tabajara?</label>
+        <div class="col-sm-10">
+            <select name="cartaoTabajara" id="cartaoTabajara"  value="false" class="form-control">
+                <option value=false>Não</option>
+                <option value=true>Sim</option>
+                
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-sm-10 offset-sm-2" style="margin-top:10px;">
+            <button type="submit" class="btn btn-primary">Calcular Cupom Fiscal</button>
+        </div>
+    </div>
+</form>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+<script src="~/js/jquery-3.7.1.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#tipoPagamento').change(function () {
+            if ($(this).val() === 'Cartao') {
+                $('#idCartaoTabajara').show();
+            } else {
+                $('#idCartaoTabajara').hide();
+            }
+        });
+    });
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
