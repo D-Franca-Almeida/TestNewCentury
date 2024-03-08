@@ -1,13 +1,148 @@
-﻿@{
+﻿@model NewCenturyTest.Models.Q5Models.HistoricoTentativas;
+@{
     ViewData["Title"] = "Q5";
 }
 
+<div class="container">
+    <form asp-action="Q5Create">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <select name="CodJogador" id="CodJogador" class="form-control">
+                <option value="Jogador1">Jogador 1</option>
+                <option value="Jogador2">Jogador 2</option>
+                <option value="Jogador3">Jogador 3</option>
+                <option value="Machine">Máquina</option>
+            </select>
+        </div>
+        <div class="form-group" style="margin-top:10px;">
+            <input type="hidden" name="NumeroDoJogo" value="@ViewBag.UltimoJogo" />
+            <h4 id="numeroDoJogo"> Número do Jogo: @ViewBag.UltimoJogo</h4>
+        </div>
+        <div class="form-group" style="margin-top:10px;">
+            <label asp-for="NivelDoJogo" class="control-label">Nível do Jogo:</label>
+            <select asp-for="NivelDoJogo" class="form-control" id="nivel">
+                <option value="1">Nível 1</option>
+                <option value="2">Nível 2</option>
+                <option value="3">Nível 3</option>
+            </select>
+            <span asp-validation-for="NivelDoJogo" class="text-danger"></span>
+        </div>
+        <div class="form-group" style="margin-top:10px;">
+            <label asp-for="NumeroDigitado" class="control-label"></label>
+            <input asp-for="NumeroDigitado" class="form-control" id="NumeroDigitado" />
+            <span asp-validation-for="NumeroDigitado" class="text-danger"></span>
+        </div>
+        <div class="form-group" style="margin-top:10px;">
+            <label asp-for="NumeroAleatorio" class="control-label"></label>
+            <input asp-for="NumeroAleatorio" class="form-control" id="NumeroAleatorio" />
+            <span asp-validation-for="NumeroAleatorio" class="text-danger"></span>
+        </div>
+        <div class="form-group" style="margin-top:10px;">
+            <input type="hidden" name="NumTentativa" value="@ViewBag.Num_Tentativas" />
+            <h4 id="numTentativa"> Tentativa Número:  @ViewBag.Num_Tentativas</h4>
+        </div>
+        <div class="form-group" style="margin-top:10px;">
+            <input type="submit" value="Create" class="btn btn-primary" />
+        </div>
+    </form>
 
+    <div style="margin-top:10px;">
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+    <div class="container">
+        
+        <br /><br />
+        <p>Não foi possível completar este item(Q5) 100%.</p>
+        <br />      
+    </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
+<script src="~/js/jquery-3.7.1.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#CodJogador').change(function () {
+            if ($(this).val() === 'Machine') {
+                // Gera um número aleatório entre 0 e 100
+                var numeroAleatorio = Math.floor(Math.random() * 101);
+                // Define o número aleatório no campo NumeroDigitado
+                $('#NumeroDigitado').val(numeroAleatorio);
+                // Desativa o campo para que não possa ser editado
+                $('#NumeroDigitado').prop('disabled', true);
+                $('#NumeroAleatorio').prop('disabled', true);
+            } else {
+                //Limpa o campo e habilita para o número poder ser digitado; 
+                $('#NumeroDigitado').val('');
+                $('#NumeroDigitado').prop('disabled', false);
+            }
+        });
+
+        // Gerando número aleatório;
+        $('#NumeroAleatorio').val(Math.floor(Math.random() * 101));
+
+        var numerosJogados = @Html.Raw(Json.Serialize(ViewBag.NumerosJogados));
+
+        // Monitora a alteração do campo NumeroDigitado
+        $('#NumeroDigitado').on('change', function () {
+            var numeroDigitado = $(this).val();
+
+            // Verifica se o número digitado já foi digitado
+            if (numerosJogados.includes(parseInt(numeroDigitado))) {
+                alert('Você já jogou este número. Tente outro.');
+                // Limpa o campo NumeroDigitado para que o jogador possa tentar outro número
+                $(this).val('');
+            }
+        });
+
+        //Controlando o nivel da viewbag
+        var nivelDaViewBag = parseInt('@ViewBag.NivelDoJogo');
+        $('#nivel').val(nivelDaViewBag);
+        $('#nivel').on('change', function () {
+            var nivelSelecionado = parseInt($(this).val());
+            var tentativa = @ViewBag.Num_Tentativas;
+
+            // Se o nível selecionado for diferente do nível da ViewBag
+            if (nivelSelecionado !== nivelDaViewBag) {
+                // Define o valor do campo Nível do Jogo como o valor da ViewBag
+                if (tentativa != 0) {
+                    $(this).val(nivelDaViewBag);
+                }              
+            }
+        });
+
+        function verificarTentativaPermitida(nivelDoJogo, numTentativa) {
+            var nivel = parseInt(nivelDoJogo);
+            switch (nivel) {
+                case 1:
+                    return numTentativa < 3;
+                    break;
+                case 2:
+                    return numTentativa < 2;
+                    break;
+                case 3:
+                    return numTentativa < 1;
+                    break;
+                default:
+                    return false;
+            }
+        }
+        
+
+        // Monitora a alteração do campo Nível do Jogo
+        $('#nivel').change(function () {
+            var nivelSelecionado = $(this).val();
+            var numTentativa = parseInt($('#numTentativa').text().trim().split(':')[1].trim());
+            var tentativaPermitida = verificarTentativaPermitida(nivelSelecionado, numTentativa);
+            if (!tentativaPermitida) {
+                alert('Você atingiu o limite de tentativas para este nível.');
+            }
+        });
+
+        
+
+    });
+
+</script>
 
 @section Scripts {
     @{

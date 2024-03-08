@@ -1,14 +1,12 @@
 [
   {
-    "Id": 1,
-    "Name": "João",
-    "ContadorVitorias": 0,
-    "ContadorDerrotas": 0 
-  },
-  {
-    "Id": 2,
-    "Name": "Maria",
-    "ContadorVitorias": 0,
-    "ContadorDerrotas": 0
+    "CodJogador": "1",
+    "NumTentativa": 1,
+    "NumeroDigitado": 50,
+    "DataHoraTentativa": "2024-03-06T12:00:00",
+    "Resultado": 0,
+    "NivelDoJogo": "1",
+    "NumeroDoJogo": 0,
+    "NumeroAleatorio": 1
   }
 ]

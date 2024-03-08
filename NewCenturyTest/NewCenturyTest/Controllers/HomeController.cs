@@ -13,11 +13,14 @@ namespace NewCenturyTest.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly string _dataFilePath;
+        private int NumeroDoJogo = 0;
 
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
-            _dataFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "HistoricoTentativas.json");
+            //Para ver o histórico sendo alterado, você pode alterar pelo arquivo no seu endereço de máquina como exemplo abaixo; 
+            // _dataFilePath = @"C:\Users\User\Desktop\TestNewCentury\NewCenturyTest\NewCenturyTest\Data\HistoricoTentativas.json";
+            _dataFilePath = Path.Combine(Directory.GetCurrentDirectory(), "DATA", "HistoricoTentativas.json");
         }
 
         public IActionResult Index()
@@ -126,88 +129,152 @@ namespace NewCenturyTest.Controllers
         {
             return View();
         }
+        public IActionResult Q5Create(string CodJogador, string NivelDoJogo, int NumTentativa, int NumeroDigitado, int NumeroDoJogo, int NumeroAleatorio)
+        {
+            try{
+
+                //Verifica se o número e tentativas de jogo são permitidos, se não reseta para um novo jogo
+                var resultado = (NumeroDigitado == NumeroAleatorio) == true ? Resultado.SUCCESS : Resultado.WRONG;
+                var dados = LerDados();
+                //Adiciona o novo jogo ao banco de dados; 
+                var novoHistorico = new HistoricoTentativas
+                {
+                        CodJogador = CodJogador,
+                        NivelDoJogo = NivelDoJogo,
+                        NumTentativa = NumTentativa,
+                        NumeroDigitado = NumeroDigitado,
+                        NumeroDoJogo = NumeroDoJogo,
+                        DataHoraTentativa = DateTime.Now,
+                        Resultado = resultado,
+                        NumeroAleatorio = NumeroAleatorio
+                };
+                //Adicionando a nova tentativa no histórico; 
+                dados.Add(novoHistorico);
+                var ultimoJogo = dados.OrderByDescending(d => d.DataHoraTentativa).FirstOrDefault();
+                var controleUltimoJogo = ultimoJogo;
+                //if(ultimoJogo.Resultado == Resultado.SUCCESS)
+                //{
+                //    ultimoJogo.NumeroDoJogo++;
+                //}
+                //Pegando o último jogo;
+                ViewBag.UltimoJogo = ultimoJogo.NumeroDoJogo;
+
+                //Numero de tentativas
+                var tentativas = dados.Where(d => d.NumeroDoJogo == NumeroDoJogo && d.CodJogador == CodJogador);
+               
+                //Garante que o jogo começa no 0 se necessário; 
+                if (ultimoJogo.NumeroDoJogo == controleUltimoJogo.NumeroDoJogo)
+                {
+                    ViewBag.Num_Tentativas = tentativas.Count();
+                }
+                else
+                {
+                    ViewBag.Num_Tentativas = 0;
+                }
+
+                //Numeros jogados
+                var numerosJogados = dados
+                .Where(d => d.NumeroDoJogo == NumeroDoJogo)
+                .Select(d => d.NumeroDigitado)
+                .ToList();
+                ViewBag.NumerosJogados = numerosJogados;
+
+                //Numero de Nivel do jogo            
+                ViewBag.NivelDoJogo = NivelDoJogo;
+
+                // Salvo os novos dados no banco de dados;
+                SalvarDadosJogador(dados);
+
+            return RedirectToAction("Q5");
+            }catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao adicionar dados: {ex.Message}");
+            }          
+        }
+              
         public IActionResult Q5()
         {
-            List<Jogador> modelo = GerarListaAleatoriaJogadores(10);
-            try
+            var dados = LerDados();
+            
+            var ultimoJogo = dados.OrderByDescending(d => d.DataHoraTentativa).FirstOrDefault();
+            var controleUltimoJogo = ultimoJogo.NumeroDoJogo;
+            if (ultimoJogo.Resultado == Resultado.SUCCESS)
             {
-                var dados = LerDados();
-                dados.AddRange(modelo);
-
-                SalvarDados(dados);
-
-                //return Ok("Dados adicionados com sucesso");
-                return View();
+                ultimoJogo.NumeroDoJogo++;
             }
-            catch (Exception ex)
+            // Pega o último jogo para colocar na página; 
+            ViewBag.UltimoJogo = ultimoJogo.NumeroDoJogo;
+            //Numero de tentativas
+            var tentativas = dados.Where(d => d.NumeroDoJogo == ultimoJogo.NumeroDoJogo && d.CodJogador == ultimoJogo.CodJogador);
+            //Garante que as tentativas novas vão ser iniciadas do 0; 
+            if(ultimoJogo.NumeroDoJogo == controleUltimoJogo)
             {
-                //return StatusCode(500, $"Erro ao adicionar dados: {ex.Message}");
-                return View();
+                ViewBag.Num_Tentativas = tentativas.Count();
             }
-            //return View();
+            else
+            {
+                ViewBag.Num_Tentativas = 0;
+            }
+            
+
+            //Garantindo o array para verificar quantos numeros foram jogados
+            var numerosJogados = dados
+            .Where(d => d.NumeroDoJogo == ultimoJogo.NumeroDoJogo)
+            .Select(d => d.NumeroDigitado)
+            .ToList();
+            ViewBag.NumerosJogados = numerosJogados;
+
+            //Numero de Nivel do jogo            
+            ViewBag.NivelDoJogo = ultimoJogo.NivelDoJogo;
+
+            
+            return View();
         }
 
-        private List<Jogador> LerDados()
+        //Lê os dados que estão salvos no banco de tentativas; 
+        private List<HistoricoTentativas> LerDados()
         {
             try
             {
                 if (!System.IO.File.Exists(_dataFilePath))
                 {
-                    return new List<Jogador>();
+                    return new List<HistoricoTentativas>();
                 }
 
                 var json = System.IO.File.ReadAllText(_dataFilePath);
-                return JsonConvert.DeserializeObject<List<Jogador>>(json);
+                return JsonConvert.DeserializeObject<List<HistoricoTentativas>>(json);
             }
             catch (Exception ex)
             {
-                // Log do erro para diagnóstico
+                
                 Console.WriteLine($"Erro ao ler dados do arquivo JSON: {ex}");
-                throw; // Re-throw para sinalizar que ocorreu um erro
+                throw;
             }
         }
 
-        private void SalvarDados(List<Jogador> dados)
+        // Salva os dados no banco de dados e garante que não tem duplicidade de eventos que já ocorreram.
+        private void SalvarDadosJogador(List<HistoricoTentativas> dados)
         {
-            try {
+            try
+            {
+             
                 var json = JsonConvert.SerializeObject(dados, Formatting.Indented);
-                var linhas = new[] { json }; // Coloca o JSON em um array de uma única linha
-                System.IO.File.WriteAllLines(_dataFilePath, linhas);
+
+                // Escreve os dados JSON no arquivo (substituindo o conteúdo existente)
+                System.IO.File.WriteAllText(_dataFilePath, json);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
+                
                 Console.WriteLine($"Erro ao ler dados do arquivo JSON: {ex}");
-                throw; // Re-throw para sinalizar que ocorreu um erro
+                throw;
             }
         }
-
-        static List<Jogador> GerarListaAleatoriaJogadores(int quantidade)
-        {
-            var nomes = new[] { "João", "Maria", "Pedro", "Ana", "José", "Carla", "Lucas", "Fernanda", "Marcos", "Amanda" };
-            var rand = new Random();
-            var listaJogadores = new List<Jogador>();
-
-            for (int i = 1; i <= quantidade; i++)
-            {
-                var nomeAleatorio = nomes[rand.Next(nomes.Length)];
-                var jogador = new Jogador
-                {
-                    Id = i,
-                    Name = nomeAleatorio,
-                    ContadorVitorias = rand.Next(0, 11), // Vitórias aleatórias entre 0 e 10
-                    ContadorDerrotas = rand.Next(0, 11) // Derrotas aleatórias entre 0 e 10
-                };
-                listaJogadores.Add(jogador);
-            }
-
-            return listaJogadores;
-        }
-
+      
         public IActionResult Privacy()
         {
             return View();
         }
-
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
@@ -239,7 +306,7 @@ namespace NewCenturyTest.Controllers
 
         private double RetornaPreco(string tipo, double quantidade)
         {
-            double precoTotal = 0;
+    
             double carneExtra = 0;
             double carne = 0; 
 

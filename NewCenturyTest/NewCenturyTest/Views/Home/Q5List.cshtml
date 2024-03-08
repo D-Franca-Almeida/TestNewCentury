@@ -1,0 +1,65 @@
+﻿@model IEnumerable<NewCenturyTest.Models.Q5Models.HistoricoTentativas>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.CodJogador)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NumTentativa)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NumeroDigitado)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DataHoraTentativa)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Resultado)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NivelDoJogo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NumeroDoJogo)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.CodJogador)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NumTentativa)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NumeroDigitado)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DataHoraTentativa)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Resultado)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NivelDoJogo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NumeroDoJogo)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
